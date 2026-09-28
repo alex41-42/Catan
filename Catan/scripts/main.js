@@ -200,15 +200,18 @@ document.addEventListener('contextmenu', (e) => {
 let roll = false;
 let rolldirection = 0; // -1 ou 1
 let notchs = 0;
+let rollMode = "building";
 // reset automatique
 function resetRoll() {
     roll = false;
     rolldirection = 0;
     notchs = 0;
+    rollMode = "building";
 }
 
 document.addEventListener('wheel', (e) => {
     roll = true;
+    rollMode = e.shiftKey ? "material" : "building";
     // direction : deltaY > 0 = scroll bas (1), < 0 = scroll haut (-1)
     rolldirection = Math.sign(e.deltaY);
     notchs = Math.min(10, Math.max(1, Math.abs(e.deltaY) / 100));
@@ -522,9 +525,11 @@ function drawMinimap(minimapX, minimapY, minimapWidth = MINIMAP_WIDTH, minimapHe
                 }
             }
 
-            const drawX = minimapX + x * minimapTileSize;
-            const drawY = minimapY + y * minimapTileSize;
-            fillRect(ctx, drawX, drawY, minimapTileSize, minimapTileSize, color, 1);
+            const drawX = minimapX + Math.floor(x * minimapTileSize);
+            const drawY = minimapY + Math.floor(y * minimapTileSize);
+            const drawWidth = Math.ceil((x + 1) * minimapTileSize) - Math.floor(x * minimapTileSize);
+            const drawHeight = Math.ceil((y + 1) * minimapTileSize) - Math.floor(y * minimapTileSize);
+            fillRect(ctx, drawX, drawY, drawWidth, drawHeight, color, 1);
         }
     }
 
@@ -581,10 +586,16 @@ function handleBuildPlacement(cursorMap) {
 function handleBuildSelection() {
     if (!roll) return;
 
-    const choices = getBuildChoices();
-    if (choices.length) {
-        buildID[2] = mod(buildID[2] + notchs * rolldirection, choices.length);
+    if (rollMode === "material") {
+        buildID[1] = mod(buildID[1] + notchs * rolldirection, BUILDING_MATERIALS.length);
+        buildID[2] = 0;
         updateCursorFromBuildID();
+    } else {
+        const choices = getBuildChoices();
+        if (choices.length) {
+            buildID[2] = mod(buildID[2] + notchs * rolldirection, choices.length);
+            updateCursorFromBuildID();
+        }
     }
     resetRoll();
 }
