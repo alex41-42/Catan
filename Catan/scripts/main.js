@@ -1,5 +1,6 @@
-const canvas = document.getElementById('Canvas');
-const ctx = canvas.getContext('2d');
+const game = window.Game || { canvas: document.getElementById('Canvas'), ctx: document.getElementById('Canvas').getContext('2d') };
+const canvas = game.canvas;
+const ctx = game.ctx;
 const PI = Math.PI;
 let SCREEN_WIDTH = 0;
 let SCREEN_HEIGHT = 0;
