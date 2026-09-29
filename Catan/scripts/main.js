@@ -553,7 +553,7 @@ function drawMinimap(minimapX, minimapY, minimapWidth = MINIMAP_WIDTH, minimapHe
     const viewW = (SCREEN_WIDTH / (MAP_WIDTH * TILE_SIZE)) * minimapWidth;
     const viewH = (SCREEN_HEIGHT / (MAP_HEIGHT * TILE_SIZE)) * minimapHeight;
 
-    ctx.strokeStyle = "yellow";
+    ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 1;
     ctx.strokeRect(viewX, viewY, viewW, viewH);
 }
