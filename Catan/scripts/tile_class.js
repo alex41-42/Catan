@@ -25,9 +25,10 @@ class Tile {
             if (availableVariants.length === 1) {
                 index = 0;
             } else{
-                if (this.variant < 0.85) {index = 0;}
-                else if (this.variant < 0.925) {index = 1;}
-                else if (this.variant < 1) {index = 2;}
+                if (this.variant < 0.75) {index = 0;}
+                else if (this.variant < 0.85) {index = 1;}
+                else if (this.variant < 0.95) {index = 2;}
+                else if (this.variant < 1) {index = 3;}
                 index %= availableVariants.length;
             }
             const [spriteX, spriteY] = availableVariants[index];
