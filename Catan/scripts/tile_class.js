@@ -21,7 +21,14 @@ class Tile {
                 ?? pointers[this.type]?.[""]
                 ?? [[0, 0]];
 
-            const index = availableVariants.length < 2 ? 0 : this.variant < 0.85 ? 0 : 1;
+            let index;
+            if (availableVariants.length === 1) {
+                index = 0;
+            } else{
+                if (this.variant < 0.85) {index = 0;}
+                if (this.variant < 0.925) {index = 1;}
+                if (this.variant < 1) {index = 2;}
+            }
             const [spriteX, spriteY] = availableVariants[index];
 
             this.x = spriteX;
