@@ -1,6 +1,9 @@
 const canvas = document.getElementById('Canvas');
 const ctx = canvas.getContext('2d');
 const PI = Math.PI;
+let SCREEN_WIDTH = 0;
+let SCREEN_HEIGHT = 0;
+
 function clamp(a, b, c) {return Math.min(c, Math.max(b, a))}
 
 // Resize/Fullscreen
@@ -201,6 +204,10 @@ let roll = false;
 let rolldirection = 0; // -1 ou 1
 let notchs = 0;
 let rollMode = "building";
+const minimapCanvas = document.createElement('canvas');
+const minimapCtx = minimapCanvas.getContext('2d');
+let minimapDirty = true;
+
 // reset automatique
 function resetRoll() {
     roll = false;
@@ -219,13 +226,14 @@ document.addEventListener('wheel', (e) => {
 }, { passive: true });
 
 // main()
-running = true;
+let running = true;
 function main() {
 
     resizeCanvas();
     updateConstants();
 
     initLayers();
+    minimapDirty = true;
     gameLoop();
 }
 
@@ -396,7 +404,8 @@ function drawCursorPreview() {
 
 function buildCursorMap() {
     const cursorMap = [];
-    const { mapSourisX, mapSourisY } = getCursorScreenPosition();
+    const cursorPos = getCursorScreenPosition();
+    const { mapSourisX, mapSourisY, screenSourisX, screenSourisY } = cursorPos;
 
     for (let i = 0; i < cursorSize[1]; i++) {
         cursorMap[i] = [];
@@ -415,7 +424,6 @@ function buildCursorMap() {
 
             cursorMap[i][j] = valid;
             const tileSelectColor = valid ? [0, 255, 0] : [255, 0, 0];
-            const { screenSourisX, screenSourisY } = getCursorScreenPosition();
             const finalColor = !hasResources(getCurrentBuildCost()) ? [255, 180, 0] : tileSelectColor;
 
             fillRect(
@@ -496,10 +504,9 @@ function drawBuildCostUI() {
     }
 }
 
-function drawMinimap(minimapX, minimapY, minimapWidth = MINIMAP_WIDTH, minimapHeight = MINIMAP_HEIGHT) {
-    const minimapTileSize = Math.min(minimapWidth / MAP_WIDTH, minimapHeight / MAP_HEIGHT);
-
-    fillRect(ctx, minimapX, minimapY, minimapWidth, minimapHeight, [0, 0, 0], 0.35);
+function redrawMinimapBase() {
+    minimapCanvas.width = MAP_WIDTH;
+    minimapCanvas.height = MAP_HEIGHT;
 
     for (let y = 0; y < MAP_HEIGHT; y++) {
         for (let x = 0; x < MAP_WIDTH; x++) {
@@ -525,13 +532,20 @@ function drawMinimap(minimapX, minimapY, minimapWidth = MINIMAP_WIDTH, minimapHe
                 }
             }
 
-            const drawX = minimapX + Math.floor(x * minimapTileSize);
-            const drawY = minimapY + Math.floor(y * minimapTileSize);
-            const drawWidth = Math.ceil((x + 1) * minimapTileSize) - Math.floor(x * minimapTileSize);
-            const drawHeight = Math.ceil((y + 1) * minimapTileSize) - Math.floor(y * minimapTileSize);
-            fillRect(ctx, drawX, drawY, drawWidth, drawHeight, color, 1);
+            minimapCtx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+            minimapCtx.fillRect(x, y, 1, 1);
         }
     }
+}
+
+function drawMinimap(minimapX, minimapY, minimapWidth = MINIMAP_WIDTH, minimapHeight = MINIMAP_HEIGHT) {
+    if (minimapDirty) {
+        redrawMinimapBase();
+        minimapDirty = false;
+    }
+
+    fillRect(ctx, minimapX, minimapY, minimapWidth, minimapHeight, [0, 0, 0], 0.35);
+    ctx.drawImage(minimapCanvas, minimapX, minimapY, minimapWidth, minimapHeight);
 
     const viewX = minimapX + (posX / (MAP_WIDTH * TILE_SIZE)) * minimapWidth;
     const viewY = minimapY + (posY / (MAP_HEIGHT * TILE_SIZE)) * minimapHeight;
@@ -581,6 +595,8 @@ function handleBuildPlacement(cursorMap) {
             layers[1].map[mapSourisY][mapSourisX] = newTile;
         }
     }
+
+    minimapDirty = true;
 }
 
 function handleBuildSelection() {

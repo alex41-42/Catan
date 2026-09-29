@@ -16,13 +16,16 @@ class Tile {
                 this.y = Y;
                 return;
             }
-            let coor = pointers[this.type][this.edges] 
-                ?? pointers[this.type][""];
-            
-            let index = Math.floor(this.variant * coor.length) * Math.round(Math.random()*Math.random());
 
-            this.x = coor[index][0];
-            this.y = coor[index][1];
+            const availableVariants = pointers[this.type]?.[this.edges]
+                ?? pointers[this.type]?.[""]
+                ?? [[0, 0]];
+
+            const index = Math.floor(this.variant * availableVariants.length) % availableVariants.length;
+            const [spriteX, spriteY] = availableVariants[index];
+
+            this.x = spriteX;
+            this.y = spriteY;
         }
         
         edging(U,D,L,R, UL,UR,DL,DR){
@@ -72,7 +75,6 @@ class Tile {
         
         draw(x,y){
             if (this.type === "empty") return;
-            ctx.imageSmoothingEnabled = false;
             ctx.drawImage(
                 this.tileset,
                 // x, y tileset

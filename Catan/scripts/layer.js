@@ -67,17 +67,21 @@ class Layer {
     }
 
     draw(ctx, offsetX, offsetY, screenW, screenH, tileSize) {
-
-        const tileX = Math.floor(offsetX / tileSize);
-        const tileY = Math.floor(offsetY / tileSize);
-
+        const map = this.map;
+        const inv_tileSize = 1 / tileSize;
+        const tileX = Math.floor(offsetX * inv_tileSize);
+        const tileY = Math.floor(offsetY * inv_tileSize);
         const subX = offsetX % tileSize;
         const subY = offsetY % tileSize;
+        const visibleCols = Math.floor(screenW * inv_tileSize) + 2;
+        const visibleRows = Math.floor(screenH * inv_tileSize) + 2;
 
-        for (let y = 0; y <= Math.floor(screenH / tileSize)+1; y++) {
-            for (let x = 0; x <= Math.floor(screenW / tileSize)+1; x++) {
+        ctx.imageSmoothingEnabled = false;
 
-                const tile = this.map[tileY + y]?.[tileX + x];
+        for (let y = 0; y < visibleRows; y++) {
+            const rowIndex = tileY + y;
+            for (let x = 0; x < visibleCols; x++) {
+                const tile = map[rowIndex]?.[tileX + x];
                 if (!tile) continue;
 
                 tile.draw(
