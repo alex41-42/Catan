@@ -1,2 +1,1 @@
-# simple-game-for-test
-Read the title please!
+# a try of a catan in 2d square-tiles
